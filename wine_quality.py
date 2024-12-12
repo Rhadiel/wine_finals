@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
@@ -49,7 +49,14 @@ if section == "2. Data Exploration and Preparation":
     st.subheader("Correlation Heatmap")
     corr = data.corr()
     fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
+    cax = ax.matshow(corr, cmap='coolwarm')
+    fig.colorbar(cax)
+    ax.set_xticks(np.arange(len(corr.columns)))
+    ax.set_yticks(np.arange(len(corr.columns)))
+    ax.set_xticklabels(corr.columns, rotation=45, ha='left')
+    ax.set_yticklabels(corr.columns)
+    for (i, j), val in np.ndenumerate(corr):
+        ax.text(j, i, f"{val:.2f}", ha='center', va='center', color='white')
     st.pyplot(fig)
 
 if section == "3. Analysis and Insights":
@@ -70,7 +77,11 @@ if section == "3. Analysis and Insights":
     y_col = st.selectbox("Select Y-axis feature", data.columns[:-1])
 
     fig, ax = plt.subplots()
-    sns.scatterplot(x=data[x_col], y=data[y_col], hue=data['Cluster'], palette='viridis', ax=ax)
+    scatter = ax.scatter(data[x_col], data[y_col], c=data['Cluster'], cmap='viridis')
+    legend1 = ax.legend(*scatter.legend_elements(), title="Clusters")
+    ax.add_artist(legend1)
+    ax.set_xlabel(x_col)
+    ax.set_ylabel(y_col)
     st.pyplot(fig)
 
 if section == "4. Conclusions and Recommendations":
